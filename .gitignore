@@ -38,4 +38,4 @@ celerybeat-schedule.*
 celerybeat.pid
 
 # Local notes
-notes.txt
+notes.md
