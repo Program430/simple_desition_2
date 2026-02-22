@@ -1,0 +1,28 @@
+# Минимальный конфиг Loki для dev
+# Без аутентификации, с хранением на файловой системе внутри контейнера
+
+auth_enabled: false  # Отключаем auth — в dev не нужно
+
+server:
+  http_listen_port: 3100  # Порт на котором Loki принимает запросы
+
+common:
+  path_prefix: /loki  # Базовая директория для всех данных Loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks  # Сами логи (сжатые блоки)
+      rules_directory: /loki/rules    # Правила алертов (пустая в dev)
+  replication_factor: 1  # Одна нода — без репликации
+  ring:
+    kvstore:
+      store: inmemory  # Координация нод в памяти (норм для 1 ноды)
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: tsdb      # Движок индексов (современный, быстрый)
+      object_store: filesystem
+      schema: v13      # Актуальная версия схемы
+      index:
+        prefix: index_
+        period: 24h    # Один индексный файл = один день

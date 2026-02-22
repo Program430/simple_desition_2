@@ -1,0 +1,51 @@
+services:
+
+  loki:
+    image: grafana/loki:3.0.0
+    ports:
+      - "3100:3100"    # Порт Loki API (нужен Promtail и Grafana для обращения)
+    volumes:
+      # Монтируем наш конфиг внутрь контейнера по пути, который Loki ждёт
+      - ./monitoring/loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - app_net
+
+  promtail:
+    image: grafana/promtail:3.0.0
+    volumes:
+      # Конфиг Promtail
+      - ./monitoring/promtail-config.yaml:/etc/promtail/config.yaml
+      # Docker socket — без него Promtail не может читать логи контейнеров.
+      # Promtail использует Docker API чтобы найти контейнеры и читать их stdout/stderr.
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yaml
+    depends_on:
+      - loki   # Стартуем после Loki (чтобы было куда слать логи)
+    networks:
+      - app_net
+
+  grafana:
+    image: grafana/grafana:11.0.0
+    ports:
+      - "3001:3000"    # UI Grafana открывается на http://localhost:3000
+    environment:
+      # Для dev отключаем авторизацию — заходим сразу без логина/пароля
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      # Папка provisioning — Grafana читает её при старте и автоматически
+      # добавляет datasource Loki. Без этого пришлось бы делать вручную в UI.
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - loki
+    networks:
+      - app_net
+
+networks:
+  # Используем уже существующую сеть из docker-compose.infra.yml
+  # Поэтому все сервисы (web, worker, loki, grafana) видят друг друга
+  app_net:
+    external: true
+    name: app_net

@@ -1,0 +1,42 @@
+# Git
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment files (contain secrets)
+.env
+*.env
+
+# Caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Tests (not needed in image)
+tests/
+
+# IDE
+.vscode/
+.idea/
+
+# Docker files (not needed inside container)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+
+# Local notes
+notes.txt

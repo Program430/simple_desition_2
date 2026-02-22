@@ -1,0 +1,11 @@
+# Grafana provisioning — автоматическое добавление источника данных при старте.
+# Без этого файла пришлось бы каждый раз вручную добавлять Loki в UI.
+
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    url: http://loki:3100  # Loki доступен по имени сервиса внутри Docker сети
+    access: proxy           # Grafana сама ходит в Loki (не браузер напрямую)
+    isDefault: true         # Делаем дефолтным источником данных

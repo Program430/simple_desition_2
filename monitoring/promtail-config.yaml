@@ -1,0 +1,36 @@
+# Минимальный конфиг Promtail для dev
+# Promtail — агент сбора логов. Читает логи Docker контейнеров
+# и отправляет их в Loki.
+
+server:
+  http_listen_port: 9080  # Порт самого Promtail (health check, метрики)
+  grpc_listen_port: 0     # gRPC не нужен — отключаем
+
+positions:
+  # Promtail запоминает, до какого места прочитал каждый лог-файл.
+  # При рестарте продолжит с того же места, а не с начала.
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push  # Куда отправлять логи
+
+scrape_configs:
+  - job_name: docker
+    # docker_sd_configs — service discovery через Docker API.
+    # Promtail сам находит все запущенные контейнеры
+    # и читает их логи через Docker socket.
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock  # Docker socket (пробрасываем в compose)
+        refresh_interval: 5s               # Как часто проверять новые контейнеры
+
+    relabel_configs:
+      # Берём имя контейнера из метаданных Docker
+      # и записываем как label "container" в Loki.
+      # Это позволит фильтровать логи по имени контейнера в Grafana.
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"           # Docker добавляет "/" в начало имени — убираем
+        target_label: "container"
+
+      # Добавляем label с именем compose-сервиса (web, worker и т.д.)
+      - source_labels: ["__meta_docker_container_label_com_docker_compose_service"]
+        target_label: "service"

@@ -1,0 +1,40 @@
+services:
+  web:
+    build: .
+    env_file: .env
+    command: poetry run uvicorn src.web.app:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
+      - ./tests/data:/app/tests/data
+    networks:
+      - app_net
+
+  web-debug:
+    build: .
+    env_file: .env
+    command: sh -c "poetry add debugpy && poetry run python -m debugpy --listen 0.0.0.0:5678 --wait-for-client -m uvicorn src.web.app:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+      - "5678:5678"
+    volumes:
+      - ./src:/app/src
+    networks:
+      - app_net
+
+  worker:
+    build: .
+    env_file: .env
+    command: poetry run celery -A src.worker.app:celery_app worker --beat --loglevel=warning
+    volumes:
+      - ./src:/app/src
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    external: true
+    name: app_net

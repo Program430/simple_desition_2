@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+*.env
+!.env.example
+
+# Type checker
+.mypy_cache/
+
+# Tests
+.pytest_cache/
+
+# Linter
+.ruff_cache/
+
+# Logs
+*.log
+logs/
+
+# Celery Beat — файл состояния расписания, генерируется автоматически
+celerybeat-schedule
+celerybeat-schedule.*
+celerybeat.pid
+
+# Local notes
+notes.txt
