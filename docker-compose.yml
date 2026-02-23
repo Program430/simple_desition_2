@@ -26,7 +26,9 @@ services:
       - app_net
 
   worker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
     env_file: .env
     command: poetry run celery -A src.worker.app:celery_app worker --beat --loglevel=warning
     volumes:

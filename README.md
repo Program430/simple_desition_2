@@ -111,6 +111,8 @@ make upgrade
 # Web API (port 8000)
 make dev-web
 
+make load-data(Optional)
+
 # Worker (in a separate terminal)
 make dev-worker
 ```
